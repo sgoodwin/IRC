@@ -8,14 +8,20 @@
 
 import Foundation
 
-struct IRCUser {
-    let username: String
-    let realName: String
-    let nick: String
+public struct IRCUser {
+    public let username: String
+    public let realName: String
+    public let nick: String
+    
+    public init(username: String, realName: String, nick: String) {
+        self.username = username
+        self.realName = realName
+        self.nick = nick
+    }
 }
 
-class IRCChannel {
-    var delegate: IRCChannelDelegate? = nil {
+public class IRCChannel {
+    public var delegate: IRCChannelDelegate? = nil {
         didSet {
             guard let delegate = delegate else {
                 return
@@ -27,16 +33,16 @@ class IRCChannel {
             buffer = []
         }
     }
-    let name: String
-    let server: IRCServer
+    public let name: String
+    public let server: IRCServer
     private var buffer = [String]()
     
-    fileprivate init(name: String, server: IRCServer) {
+    public init(name: String, server: IRCServer) {
         self.name = name
         self.server = server
     }
     
-    fileprivate func receive(_ text: String) {
+    func receive(_ text: String) {
         if let delegate = self.delegate {
             delegate.didRecieveMessage(self, message: text)
         } else {
@@ -44,13 +50,13 @@ class IRCChannel {
         }
     }
     
-    func send(_ text: String) {
+    public func send(_ text: String) {
         server.send("PRIVMSG #\(name) :\(text)")
     }
 }
 
-class IRCServer {
-    var delegate: IRCServerDelegate? {
+public class IRCServer {
+    public var delegate: IRCServerDelegate? {
         didSet {
             guard let delegate = delegate else {
                 return
@@ -68,7 +74,7 @@ class IRCServer {
     private var task: URLSessionStreamTask!
     private var channels = [IRCChannel]()
     
-    internal required init(hostname: String, port: Int, user: IRCUser, session: URLSession) {
+    public required init(hostname: String, port: Int, user: IRCUser, session: URLSession) {
         self.session = session
         
         task = session.streamTask(withHostName: hostname, port: port)
@@ -79,7 +85,7 @@ class IRCServer {
         send("NICK \(user.nick)")
     }
     
-    class func connect(_ hostname: String, port: Int, user: IRCUser, session: URLSession = URLSession.shared) -> Self {
+    public class func connect(_ hostname: String, port: Int, user: IRCUser, session: URLSession = URLSession.shared) -> Self {
         return self.init(hostname: hostname, port: port, user: user, session: session)
     }
     
@@ -132,7 +138,7 @@ class IRCServer {
         }
     }
     
-    func send(_ message: String) {
+    public func send(_ message: String) {
         task.write((message + "\r\n").data(using: .utf8)!, timeout: 0) { (error) in
             if let error = error {
                 print("Failed to send: \(String(describing: error))")
@@ -142,7 +148,7 @@ class IRCServer {
         }
     }
     
-    func join(_ channelName: String) -> IRCChannel {
+    public func join(_ channelName: String) -> IRCChannel {
         send("JOIN #\(channelName)")
         let channel = IRCChannel(name: channelName, server: self)
         channels.append(channel)
@@ -150,11 +156,11 @@ class IRCServer {
     }
 }
 
-protocol IRCServerDelegate {
+public protocol IRCServerDelegate {
     func didRecieveMessage(_ server: IRCServer, message: String)
 }
 
 
-protocol IRCChannelDelegate {
+public protocol IRCChannelDelegate {
     func didRecieveMessage(_ channel: IRCChannel, message: String)
 }
