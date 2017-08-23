@@ -16,12 +16,12 @@ struct IRCServerInputParser {
         
         if message.hasPrefix(":") {
             let firstSpaceIndex = message.index(of: " ")!
-            let source = message.substring(to: firstSpaceIndex)
-            let rest = message.substring(from: firstSpaceIndex).trimmingCharacters(in: .whitespacesAndNewlines)
+            let source = message[..<firstSpaceIndex]
+            let rest = message[firstSpaceIndex...].trimmingCharacters(in: .whitespacesAndNewlines)
             print(source)
             
             if rest.hasPrefix("PRIVMSG") {
-                let remaining = rest.substring(from: rest.index(message.startIndex, offsetBy: 8))
+                let remaining = rest[rest.index(message.startIndex, offsetBy: 8)...]
                 
                 if remaining.hasPrefix("#") {
                     let split = remaining.components(separatedBy: ":")
@@ -33,7 +33,7 @@ struct IRCServerInputParser {
                 }
             } else if rest.hasPrefix("JOIN") {
                 let user = source.components(separatedBy: "!")[0].trimmingCharacters(in: CharacterSet(charactersIn: ":"))
-                let channel = rest.substring(from: rest.index(message.startIndex, offsetBy: 5)).trimmingCharacters(in: CharacterSet(charactersIn: "# "))
+                let channel = rest[rest.index(message.startIndex, offsetBy: 5)...].trimmingCharacters(in: CharacterSet(charactersIn: "# "))
                 return .joinMessage(user: user, channel: channel)
             } else{
                 let server = source.trimmingCharacters(in: CharacterSet(charactersIn: ": "))

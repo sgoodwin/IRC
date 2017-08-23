@@ -42,6 +42,7 @@ public class IRCChannel {
         self.server = server
     }
     
+    
     func receive(_ text: String) {
         if let delegate = self.delegate {
             delegate.didRecieveMessage(self, message: text)
